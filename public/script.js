@@ -57,3 +57,36 @@ function negateValue() {
     const display = document.getElementById('display');
     display.innerText = parseFloat(display.innerText) * -1;
 }
+function updateCountsDisplay(counts) {
+    const countsList = document.getElementById('counts-list');
+    countsList.innerHTML = '';
+    for (const [button, count] of Object.entries(counts)) {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${button}: ${count}`;
+        countsList.appendChild(listItem);
+    }
+}
+function sendButtonPress(button) {
+    fetch('/button-press', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ button })
+    })
+    .then(response => response.json())
+    .then(data => updateCountsDisplay(data));
+}
+
+document.querySelectorAll('.btn').forEach(button => {
+    button.addEventListener('click', () => {
+        const buttonValue = button.textContent.trim();
+        sendButtonPress(buttonValue);
+    });
+});
+
+window.onload = () => {
+    fetch('/button-press-counts')
+        .then(response => response.json())
+        .then(data => updateCountsDisplay(data));
+};
